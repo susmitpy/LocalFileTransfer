@@ -1,35 +1,59 @@
-from flask import Flask, request, redirect, url_for, render_template_string
+from flask import Flask, request, redirect, url_for, send_from_directory, make_response
 import os
 import socket
 import qrcode
 from PIL import Image
 
 app = Flask(__name__)
-UPLOAD_FOLDER = './uploads'  # Change this to your desired folder
+UPLOAD_FOLDER = './uploads'
+DOWNLOAD_FOLDER = './downloads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            return redirect(request.url)
-        file = request.files['file']
-        if file.filename == '':
-            return redirect(request.url)
-        if file:
-            filename = file.filename
-            file.save(os.path.join(UPLOAD_FOLDER, filename))
-            return f'File {filename} uploaded successfully.'
+        # Handle file uploads
+        files = request.files.getlist('file')
+        saved_files = []
+        for file in files:
+            if file.filename:
+                filename = file.filename
+                file_path = os.path.join(UPLOAD_FOLDER, filename)
+                file.save(file_path)
+                saved_files.append(filename)
+
+        # Handle text input
+        text_content = request.form.get('text_content')
+        if text_content:
+            text_filename = 'input_text.txt'
+            text_path = os.path.join(UPLOAD_FOLDER, text_filename)
+            with open(text_path, 'w') as f:
+                f.write(text_content)
+            saved_files.append(text_filename)
+
+        return redirect(url_for('upload_file'))
+
+    # List files in the download directory
+    files = os.listdir(DOWNLOAD_FOLDER)
+    files_list = '<ol>' + ''.join([f'<li><a href="{url_for("download_file", filename=file)}" download="{file}">{file}</a></li>' for file in files]) + '</ol>'
     return '''
     <!doctype html>
-    <title>Upload new File</title>
-    <h1>Upload new File</h1>
+    <title>Upload and Download Files</title>
+    <h1>Upload New Files</h1>
     <form method=post enctype=multipart/form-data>
-      <input type=file name=file>
-      <input type=submit value=Upload>
+      <input type=file name=file multiple>
+      <input type=text name=text_content placeholder="Enter text here">
+      <input type=submit value=Upload onclick="this.disabled=true;this.value='Uploading…';this.form.submit();">
     </form>
-    '''
+    <h2>Download Files</h2>
+    ''' + files_list
+
+@app.route('/downloads/<filename>')
+def download_file(filename):
+    response = make_response(send_from_directory(DOWNLOAD_FOLDER, filename, as_attachment=True))
+    response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+    return response
 
 def get_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
