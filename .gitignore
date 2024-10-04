@@ -1,2 +1,9 @@
 .DS_Store
 env/
+
+uploads/*
+!uploads/input_text.txt
+!uploads/uploaded.txt
+
+downloads/*
+!downloads/download_me.txt
