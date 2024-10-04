@@ -2,7 +2,6 @@ from flask import Flask, request, redirect, url_for, send_from_directory, make_r
 import os
 import socket
 import qrcode
-from PIL import Image
 
 app = Flask(__name__)
 UPLOAD_FOLDER = './uploads'
