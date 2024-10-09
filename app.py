@@ -74,9 +74,7 @@ def generate_qr_code(url):
         border=4,
     )
     qr.add_data(url)
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="black", back_color="white")
-    img.show()
+    qr.print_ascii()
 
 if __name__ == "__main__":
     ip = get_ip()
