@@ -74,6 +74,10 @@ def generate_qr_code(url):
         border=4,
     )
     qr.add_data(url)
+    # Show the QR code in the terminal for CLI users
+    qr.print_ascii()
+
+    # Show as image for GUI users (for CLI users as well for better visibility)
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
     img.show()
