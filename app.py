@@ -55,7 +55,10 @@ def download_file(filename):
     return response
 
 def get_ip():
-    return socket.gethostbyname(socket.gethostname())
+    try:
+        return socket.gethostbyname("host.docker.internal")    # Host IP For macOS and Windows
+    except:
+        return socket.gethostbyname(socket.gethostname())  # Host IP For Linux
 
 def generate_qr_code(url):
     qr = qrcode.QRCode(

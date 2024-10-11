@@ -1,9 +1,22 @@
 version: '3.9'
 
 services:
-  web:
+
+  web_windows: # service for Windows/Mac
     build: .
-    network_mode: "host"
     volumes:
       - ./uploads:/localfiletransfer/uploads
       - ./downloads:/localfiletransfer/downloads
+    ports:
+      - "5000:5000" # Required for macOS/Windows to expose the container port
+    profiles:
+      - "windows_mac" # Profile name for macOS/Windows
+
+  web_linux: # service for Linux
+    build: .
+    volumes:
+      - ./uploads:/localfiletransfer/uploads
+      - ./downloads:/localfiletransfer/downloads
+    network_mode: "host" # Linux host network mode
+    profiles:
+      - "linux" # Profile name for Linux
